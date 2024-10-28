@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using System.IO;
 
 public class MainManager : MonoBehaviour
 {
@@ -11,6 +12,7 @@ public class MainManager : MonoBehaviour
     public Rigidbody Ball;
 
     public Text ScoreText;
+    public Text BestScoreText;
     public GameObject GameOverText;
 
     private bool m_Started = false;
@@ -36,6 +38,23 @@ public class MainManager : MonoBehaviour
                 brick.onDestroyed.AddListener(AddPoint);
             }
         }
+        UpdateBestScoreText();
+    }
+
+    private void UpdateBestScoreText()
+    {
+        if (MainSettings.Instance == null)
+        {
+            Debug.Log("MainSettings.Instance is null");
+            return;
+        }
+        string Name = "";
+        if (MainSettings.Instance.BestScore > 0)
+        {
+            Name = MainSettings.Instance.Name;
+        }
+        BestScoreText.text = $"Best Score: {Name}:{MainSettings.Instance.BestScore}";
+
     }
 
     private void Update()
@@ -72,23 +91,12 @@ public class MainManager : MonoBehaviour
     {
         m_GameOver = true;
         GameOverText.SetActive(true);
-    }
-
-    private void SaveInfo()
-    {
-
-    }
-
-    private void LoadInfo()
-    {
-
-    }
-
-    [System.Serializable]
-    class SaveData
-    {
-        string Name;
-        int BestScore;
+        if (MainSettings.Instance!=null && MainSettings.Instance.BestScore< m_Points)
+        {
+            MainSettings.Instance.BestScore = m_Points;
+            MainSettings.Instance.SaveSettings();
+            UpdateBestScoreText();
+        }
     }
 
 }
